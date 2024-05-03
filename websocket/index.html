@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Chat</title>
+    <style>
+        #chatbox {
+            height: 300px;
+            width: 500px;
+            border: 1px solid black;
+            overflow: auto;
+        }
+        #userInput {
+            width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div id="chatbox"></div>
+    <input id="userInput" type="text" />
+    <button id="sendButton">Send</button>
+
+    <script>
+        var ws = new WebSocket('ws://localhost:8080');
+
+        ws.onopen = function() {
+            document.getElementById('chatbox').innerHTML += '<br>Connected to server';
+        };
+
+        ws.onmessage = function(event) {
+            if (event.data instanceof Blob) {
+                var reader = new FileReader();
+                reader.onload = function() {
+                    document.getElementById('chatbox').innerHTML += '<br>Server: ' + this.result;
+                };
+                reader.readAsText(event.data);
+            } else {
+                document.getElementById('chatbox').innerHTML += '<br>Server: ' + event.data;
+            }
+        };
+
+        document.getElementById('sendButton').onclick = function() {
+            var message = document.getElementById('userInput').value;
+            ws.send(message);
+            document.getElementById('chatbox').innerHTML += '<br>You: ' + message;
+            document.getElementById('userInput').value = '';
+        };
+    </script>
+</body>
+</html>
